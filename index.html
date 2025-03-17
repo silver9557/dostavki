@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Расчет времени доставки</title>
+    <meta charset="UTF-8"> <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Расчет времени доставки</h1>
+
+        <label for="address">Выберите адрес доставки:</label>
+        <select id="address">
+            <option value="avtomatnaya">Автоматная</option>
+            <option value="garazhnaya">Гаражная</option>
+        </select>
+
+        <button onclick="calculateDeliveryTime()">Рассчитать время доставки</button>
+
+        <p id="result"></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+    <script>
+        function calculateDeliveryTime() {
+    const address = document.getElementById("address").value;
+    const now = new Date();
+    let dayOfWeek = now.getDay(); // 0 (воскресенье) - 6 (суббота)
+    let time = now.getHours() * 60 + now.getMinutes(); // Текущее время в минутах
+    let nextDay = false; // Флаг для отслеживания доставки на следующий день
+
+    const data = {
+        avtomatnaya: {
+            weekdays: [
+                { cutOff: 4 * 60 + 9, delivery: 7 * 60 + 30 }, // 4:09 -> 7:30
+                { cutOff: 9 * 60 + 30, delivery: 11 * 60 }, // 9:30 -> 11:00
+                { cutOff: 10 * 60 + 30, delivery: 12 * 60 }, // 10:30 -> 12:00
+                { cutOff: 11 * 60 + 30, delivery: 13 * 60 }, // 11:30 -> 13:00
+                { cutOff: 12 * 60 + 30, delivery: 14 * 60 }, // 12:30 -> 14:00
+                { cutOff: 13 * 60 + 30, delivery: 15 * 60 }, // 13:30 -> 15:00
+                { cutOff: 14 * 60 + 30, delivery: 16 * 60 }  // 14:30 -> 16:00
+            ],
+            saturday: [
+                { cutOff: 4 * 60 + 9, delivery: 7 * 60 + 30 }, // 4:09 -> 7:30
+                { cutOff: 11 * 60, delivery: 12 * 60 + 30 }  // 11:00 -> 12:30
+            ]
+        },
+        garazhnaya: {
+            weekdays: [
+                { cutOff: 4 * 60 + 9, delivery: 7 * 60 + 30 }, // 4:09 -> 7:30
+                { cutOff: 9 * 60 + 30, delivery: 11 * 60 }, // 9:30 -> 11:00
+                { cutOff: 10 * 60 + 30, delivery: 12 * 60 }, // 10:30 -> 12:00
+                { cutOff: 11 * 60 + 30, delivery: 13 * 60 }, // 11:30 -> 13:00
+                { cutOff: 12 * 60 + 30, delivery: 14 * 60 }, // 12:30 -> 14:00
+                { cutOff: 13 * 60 + 30, delivery: 15 * 60 }, // 13:30 -> 15:00
+                { cutOff: 14 * 60 + 30, delivery: 16 * 60 }, // 14:30 -> 16:00
+                { cutOff: 15 * 60 + 10, delivery: 16 * 60 + 50 } // 15:10 -> 16:50
+            ],
+            saturday: [
+                { cutOff: 4 * 60 + 9, delivery: 7 * 60 + 30 }, // 4:09 -> 7:30
+                { cutOff: 11 * 60, delivery: 12 * 60 + 30 }  // 11:00 -> 12:30
+            ]
+        }
+    };
+
+    if (dayOfWeek === 0) { // Если воскресенье
+        dayOfWeek = 1; // Переносим на понедельник
+        nextDay = true;
+    }
+
+    let schedule = data[address][dayOfWeek >= 1 && dayOfWeek <= 5 ? "weekdays" : "saturday"];
+    let deliveryTime = "";
+
+    for (let i = 0; i < schedule.length; i++) {
+        if (time < schedule[i].cutOff) {
+            const hours = Math.floor(schedule[i].delivery / 60);
+            const minutes = schedule[i].delivery % 60;
+            deliveryTime = `Доставка ${nextDay ? "завтра" : "сегодня"} в ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+            break;
+        }
+    }
+
+    if (!deliveryTime && !nextDay) {
+        // Если доставка сегодня не найдена, ищем на следующий день
+        dayOfWeek = (dayOfWeek + 1) % 7; // Переходим к следующему дню недели
+        schedule = data[address][dayOfWeek >= 1 && dayOfWeek <= 5 ? "weekdays" : "saturday"];
+        const hours = Math.floor(schedule[0].delivery / 60);
+        const minutes = schedule[0].delivery % 60;
+        deliveryTime = `Доставка завтра в ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+    }
+
+    document.getElementById("result").textContent = deliveryTime;
+}
+    </script>
+</body>
+</html>
