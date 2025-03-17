@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Расчет времени доставки</title>
+    <title>Время доставки с Коновалова в дарк-стор</title>
     <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -77,7 +77,7 @@
             font-weight: bold;
             color: #521751;
         }
-    
+
         .light-theme {
             background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
             color: #333;
@@ -115,7 +115,7 @@
         }
     
         .light-theme #result {
-            color: #0288d1;
+            color: #204255;
         }
 
         .delivery-info {
@@ -139,9 +139,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>Расчет времени доставки</h1>
+        <h1>Время доставки с Коновалова в дарк-сторы</h1>
 
-        <label for="address">Выберите адрес доставки:</label>
+        <label for="address">Выбери адрес доставки:</label>
         <select id="address">
             <option value="avtomatnaya">Автоматная</option>
             <option value="garazhnaya">Гаражная</option>
@@ -150,9 +150,8 @@
         <button onclick="calculateDeliveryTime()">Рассчитать время доставки</button>
 
         <p id="result" class="delivery-info"></p>
+        
     </div>
-
-    <script src="script.js"></script>
 </body>
 
     <script>
@@ -224,7 +223,22 @@
     }
 
     document.getElementById("result").textContent = deliveryTime;
-}
-    </script>
+    }
+
+    function applyThemeBasedOnTime() {
+        const now = new Date();
+        const hour = now.getHours();
+
+        // Если время с 6:00 до 18:00, включаем дневную тему
+        if (hour >= 6 && hour < 18) {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+    }
+
+    // Вызываем функцию при загрузке страницы
+    window.onload = applyThemeBasedOnTime;
+</script>
 </body>
 </html>
